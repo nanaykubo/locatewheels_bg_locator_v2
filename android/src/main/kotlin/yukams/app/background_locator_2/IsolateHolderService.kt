@@ -22,10 +22,6 @@ import yukams.app.background_locator_2.pluggables.Pluggable
 import yukams.app.background_locator_2.provider.*
 import java.util.HashMap
 import androidx.core.app.ActivityCompat
-import com.google.gson.Gson
-import java.io.File
-import java.io.FileWriter
-import java.io.IOException
 
 class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateListener, Service() {
     companion object {
@@ -346,44 +342,10 @@ class IsolateHolderService : MethodChannel.MethodCallHandler, LocationUpdateList
                     )
                 Handler(it.mainLooper)
                     .post {
-                        saveResultLocally(result, it)
+                        Log.d("plugin", "sendLocationEvent $result")
                         backgroundChannel.invokeMethod(Keys.BCM_SEND_LOCATION, result)
                     }
             }
         }
     }
-
-    private fun saveResultLocally(result: HashMap<Any, Any>, context: Context) {
-
-        // Convert the result to a JSON string (you may need to adjust this based on the data type)
-        val jsonString = Gson().toJson(result)
-
-        // Choose a file name and location to save the data
-        val fileName = "location_data.json"
-        val file = File(context.filesDir, fileName)
-
-        try {
-
-            // Check if the file already exists
-            val fileExists = file.exists()
-
-            // Open the file in append mode
-            FileWriter(file, true).use { writer ->
-                // If the file exists, add a comma to separate the existing content from the new data
-                if (fileExists) {
-                    writer.write("\n")
-                }
-                // Write the JSON string to the file
-                writer.write(jsonString)
-            }
-
-            Log.d("LocateWheelsBGLoc", "Result saved locally: $file")
-
-        } catch (e: IOException) {
-
-            Log.e("LocateWheelsBGLoc", "Error saving result locally: $e")
-
-        }
-    }
-
 }
